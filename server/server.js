@@ -1,4 +1,3 @@
-
 const express = require('express');
 const prisma = require('./db');
 const bodyParser = require('body-parser');
