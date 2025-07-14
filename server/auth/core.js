@@ -8,18 +8,16 @@ const rateLimit = require('express-rate-limit');
 const prisma = new PrismaClient();
 const router = express.Router();
 
-// Rate limiting for auth routes
+
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
+  windowMs: 15 * 60 * 1000, 
+  max: 5, 
   message: 'Too many authentication attempts, please try again later'
 });
 
-// JWT secret - should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
-// Validation middleware
 const validateEmail = (email) => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
@@ -29,12 +27,10 @@ const validatePassword = (password) => {
   return password && password.length >= 6;
 };
 
-// Signup route
 router.post('/signup', authLimiter, async (req, res) => {
   try {
     const { email, password, name } = req.body;
 
-    // Validation
     if (!email || !password || !name) {
       return res.status(400).json({
         error: 'Email, password, and name are required'
@@ -53,7 +49,6 @@ router.post('/signup', authLimiter, async (req, res) => {
       });
     }
 
-    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
@@ -64,11 +59,9 @@ router.post('/signup', authLimiter, async (req, res) => {
       });
     }
 
-    // Hash password
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user
     const user = await prisma.user.create({
       data: {
         email,
@@ -83,7 +76,6 @@ router.post('/signup', authLimiter, async (req, res) => {
       }
     });
 
-    // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       JWT_SECRET,
@@ -104,12 +96,10 @@ router.post('/signup', authLimiter, async (req, res) => {
   }
 });
 
-// Login route
 router.post('/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validation
     if (!email || !password) {
       return res.status(400).json({
         error: 'Email and password are required'
@@ -122,7 +112,6 @@ router.post('/login', authLimiter, async (req, res) => {
       });
     }
 
-    // Find user
     const user = await prisma.user.findUnique({
       where: { email }
     });
@@ -133,7 +122,6 @@ router.post('/login', authLimiter, async (req, res) => {
       });
     }
 
-    // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -142,14 +130,12 @@ router.post('/login', authLimiter, async (req, res) => {
       });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    // Update last login
     await prisma.user.update({
       where: { id: user.id },
       data: { lastLogin: new Date() }
@@ -173,7 +159,6 @@ router.post('/login', authLimiter, async (req, res) => {
   }
 });
 
-// JWT Authentication middleware
 const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers['authorization'];
@@ -187,7 +172,6 @@ const authenticateToken = async (req, res, next) => {
 
     const decoded = jwt.verify(token, JWT_SECRET);
     
-    // Optional: Check if user still exists
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       select: {
@@ -226,7 +210,6 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-// Get current user profile (protected route example)
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
@@ -249,14 +232,10 @@ router.get('/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Logout route (optional - mainly for client-side token removal)
 router.post('/logout', authenticateToken, (req, res) => {
-  // In a stateless JWT system, logout is typically handled client-side
-  // by removing the token from storage
   res.json({ message: 'Logged out successfully' });
 });
 
-// Refresh token route (optional)
 router.post('/refresh', authenticateToken, async (req, res) => {
   try {
     const newToken = jwt.sign(
@@ -276,23 +255,17 @@ router.post('/refresh', authenticateToken, async (req, res) => {
 
 module.exports = { router, authenticateToken };
 
-// ===== USAGE EXAMPLE =====
-
-// app.js - Main application file
 const express = require('express');
 const cors = require('cors');
 const { router: authRoutes, authenticateToken } = require('./auth');
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Auth routes
 app.use('/api/auth', authRoutes);
 
-// Protected route example
 app.get('/api/protected', authenticateToken, (req, res) => {
   res.json({
     message: 'This is a protected route',
@@ -300,7 +273,6 @@ app.get('/api/protected', authenticateToken, (req, res) => {
   });
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
@@ -313,7 +285,3 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-JWT_SECRET="your-super-secret-jwt-key-here"
-JWT_EXPIRES_IN="7d"
-NODE_ENV="development"
-PORT="3000"
