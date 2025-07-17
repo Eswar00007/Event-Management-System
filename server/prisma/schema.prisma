@@ -1,4 +1,4 @@
-// This is your Prisma schema file,
+/// This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
@@ -25,10 +25,19 @@ model User {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
   lastLogin         DateTime?
+  
+  averageRating     Float?        @default(0)
+  totalRatings      Int           @default(0)
 
   @@map("users")
 
-  Event Event[]
+  postedEvents      Event[]       @relation("PostedBy")
+  assignedEvents    Event[]       @relation("AssignedTo")
+  sentMessages      Conversation[] @relation("MessageFrom")
+  receivedMessages  Conversation[] @relation("MessageTo")
+  givenUserRatings  UserRating[]  @relation("RatingGiver")
+  receivedUserRatings UserRating[] @relation("RatingReceiver")
+  givenEventRatings EventRating[] @relation("EventRater")
 }
 
 model Event {
@@ -36,16 +45,49 @@ model Event {
   name              String
   description       String
   Posted_By         String
-  user              User          @relation(fields: [Posted_By], references: [username])
+  postedByUser      User          @relation("PostedBy", fields: [Posted_By], references: [username])
   Assigned_To       String
-
+  assignedToUser    User          @relation("AssignedTo", fields: [Assigned_To], references: [username])
+  
+  averageRating     Float?        @default(0)
+  totalRatings      Int           @default(0)
+  
+  eventRatings      EventRating[]
 }
+
 model Conversation {
   id                Int           @id @default(autoincrement()) @map("_id")
-  // From              User          @relation(fields: [Fromid], references: [id])
-  // Fromid Int?
-  To                String
+  From              User          @relation("MessageFrom", fields: [Fromid], references: [id])
+  Fromid            Int
+  To                User          @relation("MessageTo", fields: [Toid], references: [id])
+  Toid              Int
   message           String
+}
+
+model UserRating {
+  id                Int           @id @default(autoincrement()) @map("_id")
+  rater             User          @relation("RatingGiver", fields: [raterId], references: [id])
+  raterId           Int
+  ratedUser         User          @relation("RatingReceiver", fields: [ratedUserId], references: [id])
+  ratedUserId       Int
+  rating            Float         
+  review            String?
+  createdAt         DateTime      @default(now())
+  
+  @@unique([raterId, ratedUserId]) 
+}
+
+model EventRating {
+  id                Int           @id @default(autoincrement()) @map("_id")
+  rater             User          @relation("EventRater", fields: [raterId], references: [id])
+  raterId           Int
+  event             Event         @relation(fields: [eventId], references: [id])
+  eventId           Int
+  rating            Float         
+  review            String?
+  createdAt         DateTime      @default(now())
+  
+  @@unique([raterId, eventId]) 
 }
 
 enum Role{
