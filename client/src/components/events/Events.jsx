@@ -11,7 +11,7 @@ const AddEvent = () => {
 
   const handleAddEvent = async () => {
     try {
-      await axios.post('http://localhost:5000/courses/add', {
+      await axios.post('http://localhost:5000/Events/add', {
         name,
         description,
         event,
@@ -19,23 +19,23 @@ const AddEvent = () => {
         duration,
         notes,
       });
-      alert('Course added successfully');
+      alert('Event added successfully');
     } catch (error) {
-      console.error('Error adding course:', error);
-      alert('Failed to add course');
+      console.error('Error adding Event:', error);
+      alert('Failed to add Event');
     }
   };
 
   return (
     <div>
-      <h2>Add Course</h2>
-      <input type="text" placeholder="Course Name" value={name} onChange={(e) => setName(e.target.value)} />
+      <h2>Add Event</h2>
+      <input type="text" placeholder="Event Name" value={name} onChange={(e) => setName(e.target.value)} />
       <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
       <input type="text" placeholder="event" value={event} onChange={(e) => setevent(e.target.value)} />
       <input type="number" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} />
       <input type="number" placeholder="Duration (hours)" value={duration} onChange={(e) => setDuration(e.target.value)} />
       <input type="text" placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
-      <button onClick={handleAddEvent}>Add Course</button>
+      <button onClick={handleAddEvent}>Add Event</button>
     </div>
   );
 };
