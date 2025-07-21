@@ -1,5 +1,5 @@
 const express = require('express');
-const prisma = require('./db');
+const prisma = require('./db.ts');
 const bodyParser = require('body-parser');
 
 const app = express();
