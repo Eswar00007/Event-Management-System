@@ -1,5 +1,5 @@
 const express = require('express');
-const prisma = require('./db.ts');
+const prisma = require('./db.js');
 const bodyParser = require('body-parser');
 
 const app = express();
@@ -23,7 +23,7 @@ app.post('/users/signup', async (req, res) => {
         name,
         username,
         password,
-        email,
+        email, key
       },
     });
     res.status(201).json(newUser);
