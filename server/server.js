@@ -2,7 +2,6 @@ const express = require('express');
 const prisma = require('./db');
 const bodyParser = require('body-parser');
 
-const prisma = new PrismaClient();
 const app = express();
 app.use(bodyParser.json());
 

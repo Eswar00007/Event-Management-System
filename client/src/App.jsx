@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Signup from './signup.js';
-import Login from './Login.js';
-import Home from './home.js';
+import Signup from './components/auth/signup.jsx';
+import Login from './components/auth/Login.jsx';
+import Home from './components/home.jsx';
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem('token'));
