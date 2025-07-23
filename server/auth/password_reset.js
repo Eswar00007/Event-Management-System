@@ -1,10 +1,7 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+const router = express.Router();
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
-
-const app = express();
-app.use(bodyParser.json());
 
 const users = {
   'email': {
@@ -19,7 +16,7 @@ function generateResetCode() {
   return crypto.randomBytes(3).toString('hex').toUpperCase();
 }
 
-app.post('/request-reset', (req, res) => {
+router.post('/request-reset', (req, res) => {
   const { email } = req.body;
   const user = users[email];
   if (!user) return res.status(404).json({ message: 'User not found' });
@@ -32,7 +29,7 @@ app.post('/request-reset', (req, res) => {
   res.json({ message: 'Reset code sent' });
 });
 
-app.post('/reset-password', async (req, res) => {
+router.post('/reset-password', async (req, res) => {
   const { email, code, newPassword } = req.body;
   const user = users[email];
   if (!user || user.resetCode !== code || Date.now() > user.resetCodeExpires) {
@@ -47,6 +44,4 @@ app.post('/reset-password', async (req, res) => {
   res.json({ message: 'Password reset successful' });
 });
 
-app.listen(3000, () => {
-  console.log('Server running at http://localhost:3000');
-});
+module.exports = router;

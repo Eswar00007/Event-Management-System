@@ -1,4 +1,9 @@
-app.post('/events/add', async (req, res) => {
+const express = require('express');
+const router = express.Router();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+router.post('/events/add', async (req, res) => {
   const { name, description, author, price, duration, notes } = req.body;
 
   console.log('Received data:', req.body);
@@ -21,7 +26,7 @@ app.post('/events/add', async (req, res) => {
   }
 });
 
-app.get('/events', async (req, res) => {
+router.get('/events', async (req, res) => {
   try {
     const courses = await prisma.course.findMany();
     res.status(200).json(courses);
@@ -31,7 +36,7 @@ app.get('/events', async (req, res) => {
   }
 });
 
-app.post('/add-to-cart', async (req, res) => {
+router.post('/add-to-cart', async (req, res) => {
   const { username, courseCid } = req.body;
 
   console.log('Received data:', req.body);
@@ -64,7 +69,7 @@ app.post('/add-to-cart', async (req, res) => {
   }
 });
 
-app.get('/cart/:username', async (req, res) => {
+router.get('/cart/:username', async (req, res) => {
   const { username } = req.params;
 
   try {
@@ -84,3 +89,5 @@ app.get('/cart/:username', async (req, res) => {
     res.status(500).send('Error fetching cart items');
   }
 });
+
+module.exports = router;

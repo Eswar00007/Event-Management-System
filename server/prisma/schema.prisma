@@ -9,87 +9,87 @@ datasource db {
 }
 
 model User {
-  id                Int           @id @default(autoincrement()) @map("_id")
-  name              String
-  username          String        @unique
-  password          String
-  role              Role          @default(USER)
-  email             String        @unique
-  key               Int           @unique
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  lastLogin         DateTime?
-  
-  averageRating     Float?        @default(0)
-  totalRatings      Int           @default(0)
+  id        Int       @id @default(autoincrement()) @map("_id")
+  name      String
+  username  String    @unique
+  password  String
+  role      Role      @default(USER)
+  email     String    @unique
+  key       Int       @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLogin DateTime?
+
+  averageRating Float? @default(0)
+  totalRatings  Int    @default(0)
+
+  postedEvents        Event[]        @relation("PostedBy")
+  assignedEvents      Event[]        @relation("AssignedTo")
+  sentMessages        Conversation[] @relation("MessageFrom")
+  receivedMessages    Conversation[] @relation("MessageTo")
+  givenUserRatings    UserRating[]   @relation("RatingGiver")
+  receivedUserRatings UserRating[]   @relation("RatingReceiver")
+  givenEventRatings   EventRating[]  @relation("EventRater")
 
   @@map("users")
-
-  postedEvents      Event[]       @relation("PostedBy")
-  assignedEvents    Event[]       @relation("AssignedTo")
-  sentMessages      Conversation[] @relation("MessageFrom")
-  receivedMessages  Conversation[] @relation("MessageTo")
-  givenUserRatings  UserRating[]  @relation("RatingGiver")
-  receivedUserRatings UserRating[] @relation("RatingReceiver")
-  givenEventRatings EventRating[] @relation("EventRater")
 }
 
 model Event {
-  id                Int           @id @default(autoincrement()) @map("_id")
-  name              String
-  description       String
-  Posted_By         String
-  postedByUser      User          @relation("PostedBy", fields: [Posted_By], references: [username])
-  Assigned_To       String
-  assignedToUser    User          @relation("AssignedTo", fields: [Assigned_To], references: [username])
-  
-  averageRating     Float?        @default(0)
-  totalRatings      Int           @default(0)
-  
-  eventRatings      EventRating[]
+  id             Int    @id @default(autoincrement()) @map("_id")
+  name           String
+  description    String
+  Posted_By      String
+  postedByUser   User   @relation("PostedBy", fields: [Posted_By], references: [username])
+  Assigned_To    String
+  assignedToUser User   @relation("AssignedTo", fields: [Assigned_To], references: [username])
+
+  averageRating Float? @default(0)
+  totalRatings  Int    @default(0)
+
+  eventRatings EventRating[]
 }
 
 model Conversation {
-  id                Int           @id @default(autoincrement()) @map("_id")
-  From              User          @relation("MessageFrom", fields: [Fromid], references: [id])
-  Fromid            Int
-  To                User          @relation("MessageTo", fields: [Toid], references: [id])
-  Toid              Int
-  message           String
+  id      Int    @id @default(autoincrement()) @map("_id")
+  From    User   @relation("MessageFrom", fields: [Fromid], references: [id])
+  Fromid  Int
+  To      User   @relation("MessageTo", fields: [Toid], references: [id])
+  Toid    Int
+  message String
 }
 
 model UserRating {
-  id                Int           @id @default(autoincrement()) @map("_id")
-  rater             User          @relation("RatingGiver", fields: [raterId], references: [id])
-  raterId           Int
-  ratedUser         User          @relation("RatingReceiver", fields: [ratedUserId], references: [id])
-  ratedUserId       Int
-  rating            Float         
-  review            String?
-  createdAt         DateTime      @default(now())
-  
-  @@unique([raterId, ratedUserId]) 
+  id          Int      @id @default(autoincrement()) @map("_id")
+  rater       User     @relation("RatingGiver", fields: [raterId], references: [id])
+  raterId     Int
+  ratedUser   User     @relation("RatingReceiver", fields: [ratedUserId], references: [id])
+  ratedUserId Int
+  rating      Float
+  review      String?
+  createdAt   DateTime @default(now())
+
+  @@unique([raterId, ratedUserId])
 }
 
 model EventRating {
-  id                Int           @id @default(autoincrement()) @map("_id")
-  rater             User          @relation("EventRater", fields: [raterId], references: [id])
-  raterId           Int
-  event             Event         @relation(fields: [eventId], references: [id])
-  eventId           Int
-  rating            Float         
-  review            String?
-  createdAt         DateTime      @default(now())
-  
-  @@unique([raterId, eventId]) 
+  id        Int      @id @default(autoincrement()) @map("_id")
+  rater     User     @relation("EventRater", fields: [raterId], references: [id])
+  raterId   Int
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   Int
+  rating    Float
+  review    String?
+  createdAt DateTime @default(now())
+
+  @@unique([raterId, eventId])
 }
 
-enum Role{
+enum Role {
   USER
   EVENT_MANAGEMENT
 }
 
-enum Status{
+enum Status {
   NOT_YET_ACCEPTED
   ACCEPTED
 }
